@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<image schemaversion="7.5" name="debug-container">
+    <description type="system">
+        <author>Bernd Wachter</author>
+        <contact>bwachter-kiwi@aardsoft.fi</contact>
+        <specification>Leap based container for debugging</specification>
+    </description>
+    <preferences>
+        <type image="docker" derived_from="ghcr.io/aardsoft/leap-base:latest">
+          <containerconfig name="ghcr.io/aardsoft/debug-container" tag="0.1" additionalnames=":latest" user="root">
+            <subcommand execute="/bin/bash">
+              <argument name="-l"/>
+            </subcommand>
+          </containerconfig>
+        </type>
+        <version>0.0.1</version>
+        <packagemanager>zypper</packagemanager>
+        <rpm-excludedocs>true</rpm-excludedocs>
+    </preferences>
+    <repository type="rpm-md">
+        <source path="obsrepositories:/"/>
+    </repository>
+    <packages type="image">
+      <package name="nmap"/>
+      <package name="strace"/>
+      <package name="tcpdump"/>
+      <package name="traceroute"/>
+      <package name="lsof"/>
+      <package name="netcat-openbsd"/>
+      <package name="wget"/>
+    </packages>
+</image>
