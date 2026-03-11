@@ -1,7 +1,13 @@
-* debug container image
+* debug container image                                               :TOC_4:
+  - [[#introduction][Introduction]]
+  - [[#using-with-kubernetes][Using with kubernetes]]
+  - [[#using-with-podman][Using with podman]]
+  - [[#using-with-docker][Using with docker]]
 
+** Introduction
 This is a simple Leap based debug image, mostly intended for debugging kubernetes deployments - but possibly useful in other scenarios as well.
 
+** Using with kubernetes
 To just run the debug container standalone in kubernetes do:
 
 #+BEGIN_SRC shell
@@ -99,3 +105,37 @@ Events:
   Normal  Created  84s   kubelet  Created container: debugger-2bt5k
   Normal  Started  84s   kubelet  Started container debugger-2bt5k
 #+END_SRC
+
+** Using with podman
+
+To attach to a running podman container, grab name or ID from =podman ps=, and do:
+
+#+BEGIN_SRC bash
+podman run -it --rm \
+  --pid=container:<id_or_name> \
+  --net=container:<id_or_name> \
+  --ipc=container:<id_or_name> \
+  ghcr.io/aardsoft/debug-container:latest
+#+END_SRC
+
+To simplify this add the following function to the bash configuration. This allows just doing =debug_container <id_or_name>=:
+
+#+BEGIN_SRC bash
+debug_container() {
+    local target_id="$1"
+    if [ -z "$target_id" ]; then
+        echo "Usage: debug_container <container_id_or_name>"
+        return 1
+    fi
+
+    podman run -it --rm \
+      --pid=container:"$target_id" \
+      --net=container:"$target_id" \
+      --ipc=container:"$target_id" \
+      ghcr.io/aardsoft/debug-container:latest
+}
+#+END_SRC
+
+** Using with docker
+
+See the podman section, replace podman commands with docker.
