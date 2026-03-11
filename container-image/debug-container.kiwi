@@ -22,18 +22,31 @@
         <source path="obsrepositories:/"/>
     </repository>
     <packages type="image">
+      <package name="less"/>
+      <package name="vim-small"/>
+      <package name="mc"/>
+      <package name="jq"/>
+      <package name="gdb"/>
       <package name="nmap"/>
       <package name="strace"/>
+      <package name="ltrace"/>
       <package name="tcpdump"/>
       <package name="traceroute"/>
       <package name="lsof"/>
       <package name="netcat-openbsd"/>
       <package name="wget"/>
-      <package name="iptutils"/>
+      <package name="curl"/>
+      <package name="iperf"/>
+      <package name="iputils"/>
       <package name="iproute2"/>
+      <package name="net-tools"/>
+      <package name="socat"/>
       <package name="bind-utils"/>
       <package name="binutils"/>
       <package name="patch"/>
       <package name="diffutils"/>
+      <package name="sysstat"/>
+      <package name="htop"/>
+      <package name="perf"/>
     </packages>
 </image>
