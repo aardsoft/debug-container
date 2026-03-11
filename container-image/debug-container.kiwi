@@ -29,5 +29,11 @@
       <package name="lsof"/>
       <package name="netcat-openbsd"/>
       <package name="wget"/>
+      <package name="iptutils"/>
+      <package name="iproute2"/>
+      <package name="bind-utils"/>
+      <package name="binutils"/>
+      <package name="patch"/>
+      <package name="diffutils"/>
     </packages>
 </image>

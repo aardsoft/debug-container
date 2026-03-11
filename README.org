@@ -1,0 +1,101 @@
+* debug container image
+
+This is a simple Leap based debug image, mostly intended for debugging kubernetes deployments - but possibly useful in other scenarios as well.
+
+To just run the debug container standalone in kubernetes do:
+
+#+BEGIN_SRC shell
+kubectl run tmp-debug -it --rm --restart=Never --image=ghcr.io/aardsoft/debug-container:latest
+#+END_SRC
+
+Add =-n <namespace>= to place it into a specific namespace.
+
+To debug a deployment it needs to be attached to an existing container of a deployment. The short version is:
+
+#+BEGIN_SRC
+kubectl debug -n <namespace> -it <deployed-pod> --image=ghcr.io/aardsoft/debug-container:latest --target=<container-in-pod> --profile=general
+#+END_SRC
+
+This will attach an ephemeral container to the namespace of =<container-in-pod>=.
+
+In more detail, identify the name of the deployment. We're using the tinydns deployment:
+
+#+BEGIN_SRC shell
+k3sm3:~ # kubectl -n netconf get pods
+NAME                      READY   STATUS    RESTARTS        AGE
+dhcpd-6dbf567b66-g9fmt    2/2     Running   0               6h11m
+tinydns-f7d5f964c-d5f48   5/5     Running   3 (4h26m ago)   3d6h
+#+END_SRC
+
+If we don't remember the container names we can query them now:
+
+#+SRC_SHELL
+k3sm3:~ # kubectl -n netconf get pod tinydns-f7d5f964c-d5f48 -o jsonpath='{.spec.containers[*].name}'
+tinydns axfrdns updater uploader rebuilder
+#+END_SRC
+
+Now we want to attach to the =uploader= container there:
+
+#+BEGIN_SRC
+k3sm3:~ # kubectl debug -n netconf -it tinydns-f7d5f964c-d5f48 --image=ghcr.io/aardsoft/debug-container:latest --target=uploader --profile=general
+Targeting container "uploader". If you don't see processes from this container it may be because the container runtime doesn't support this feature.
+Defaulting debug container name to debugger-2bt5k.
+All commands and output from this session will be recorded in container logs, including credentials and sensitive information passed through the command prompt.
+If you don't see a command prompt, try pressing enter.
+bash-4.4# ps axu
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+1001         1  0.0  0.0 1230296 8612 ?        Ssl  Mar08   0:00 /usr/bin/tinydns-sidecar
+root        11  0.0  0.0   6452  3328 pts/0    Ss   08:35   0:00 /bin/bash -l
+root        17  0.0  0.0   7328  3072 pts/0    R+   08:35   0:00 ps axu
+bash-4.4#
+#+END_SRC
+
+The =tinydns-sidecar= process is from the =uploader= container - and we can debug that now. When we exit the shell we'll get the following notification:
+
+#+BEGIN_EXAMPLE
+Session ended, the ephemeral container will not be restarted but may be reattached using 'kubectl attach tinydns-f7d5f964c-d5f48 -c debugger-2bt5k -i -t' if it is still running
+#+END_EXAMPLE
+
+As the container starts with a shell as init process which just exited there should not longer be a container running.
+
+Investigating the pod while the container /is/ running will list it as ephemeral container:
+
+#+BEGIN_SRC shell
+k3sm3:~ # kubectl -n netconf describe pod tinydns
+Name:             tinydns-f7d5f964c-d5f48
+Namespace:        netconf
+[...]
+Containers:
+  tinydns:
+    [...]
+  axfrdns:
+    [...]
+  updater:
+    [...]
+  uploader:
+    [...]
+  rebuilder:
+    [...]
+Ephemeral Containers:
+  debugger-2bt5k:
+    Container ID:   containerd://a2af25644ee810110692a3b96ee80d26581f1a6a66f3a92cab973644240dca50
+    Image:          ghcr.io/aardsoft/debug-container:latest
+    Image ID:       ghcr.io/aardsoft/debug-container@sha256:700f083b0857445514019d21b0bb4f9e2c23cac912440dd2a40574756bb59a68
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Wed, 11 Mar 2026 10:35:41 +0200
+    Ready:          False
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:         <none>
+[...]
+
+Events:
+  Type    Reason   Age   From     Message
+  ----    ------   ----  ----     -------
+  Normal  Pulling  87s   kubelet  Pulling image "ghcr.io/aardsoft/debug-container:latest"
+  Normal  Pulled   84s   kubelet  Successfully pulled image "ghcr.io/aardsoft/debug-container:latest" in 2.683s (2.683s including waiting). Image size: 206774661 bytes.
+  Normal  Created  84s   kubelet  Created container: debugger-2bt5k
+  Normal  Started  84s   kubelet  Started container debugger-2bt5k
+#+END_SRC
