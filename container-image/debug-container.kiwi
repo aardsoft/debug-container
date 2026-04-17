@@ -7,7 +7,7 @@
         <specification>Leap based container for debugging</specification>
     </description>
     <preferences>
-        <type image="docker" derived_from="ghcr.io/aardsoft/leap-base:latest">
+        <type image="docker" derived_from="ghcr.io/aardsoft/leap16-base:latest">
           <containerconfig name="ghcr.io/aardsoft/debug-container" tag="0.1" additionalnames=":latest" user="root">
             <subcommand execute="/bin/bash">
               <argument name="-l"/>
