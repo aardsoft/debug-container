@@ -3,6 +3,7 @@
   - [[#using-with-kubernetes][Using with kubernetes]]
   - [[#using-with-podman][Using with podman]]
   - [[#using-with-docker][Using with docker]]
+  - [[#using-with-toolbox][Using with toolbox]]
 
 ** Introduction
 This is a simple Leap based debug image, mostly intended for debugging kubernetes deployments - but possibly useful in other scenarios as well.
@@ -139,3 +140,17 @@ debug_container() {
 ** Using with docker
 
 See the podman section, replace podman commands with docker.
+
+** Using with toolbox
+
+[[https://github.com/openSUSE/microos-toolbox][toolbox]] is the recommended tool on immutable openSUSE installations.
+
+For one off use the image can be specified as argument to =toolbox=: =toolbox --image ghcr.io/aardsoft/debug-container:latest=
+
+To set it as default image a custom =~/.toolboxrc= should be used instead:
+
+#+BEGIN_SRC sh
+REGISTRY=ghcr.io
+IMAGE=aardsoft/debug-container:latest
+TOOLBOX_NAME=tb
+#+END_SRC
