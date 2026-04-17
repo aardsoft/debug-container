@@ -14,3 +14,5 @@ jobs:
     with:
       extra-architectures: aarch64
       repository: https://download.opensuse.org/distribution/leap/16.0/repo/oss
+      # nmap nowadays is non-oss
+      extra-repositories: https://download.opensuse.org/distribution/leap/16.0/repo/non-oss
